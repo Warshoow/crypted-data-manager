@@ -56,12 +56,13 @@ encrypted_files = os.listdir(data_folder)
 
 # Décryptez chaque fichier et enregistrez-le
 for encrypted_file in encrypted_files:
-    encrypted_file_path = os.path.join(data_folder, encrypted_file)
-    decrypted_data = decrypt_file(encrypted_file_path, app_key, user_key)
+    if 'decrypted' not in encrypted_file:
+        encrypted_file_path = os.path.join(data_folder, encrypted_file)
+        decrypted_data = decrypt_file(encrypted_file_path, app_key, user_key)
 
-    # Enregistrez les données déchiffrées dans un nouveau fichier
-    decrypted_file_path = os.path.join(data_folder, "decrypted_" + encrypted_file)
-    with open(decrypted_file_path, "wb") as file:
-        file.write(decrypted_data)
+        # Enregistrez les données déchiffrées dans un nouveau fichier
+        decrypted_file_path = os.path.join(data_folder, "decrypted_" + encrypted_file)
+        with open(decrypted_file_path, "wb") as file:
+            file.write(decrypted_data)
 
 print("Les fichiers ont été déchiffrés avec succès.")
