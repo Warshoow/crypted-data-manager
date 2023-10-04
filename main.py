@@ -8,6 +8,7 @@ import zipfile
 from cryptography.fernet import Fernet
 import hashlib
 import base64
+import hmac
 
 # Chemin où seront stockés les fichiers chiffrés
 data_folder = "data_folder"
@@ -21,15 +22,16 @@ user_key_file = "user_key.key"
 def generate_app_key(user_password, user_key):
     # Combinez le mot de passe de l'utilisateur et la clé de l'utilisateur
     combined_key = user_password.encode() + user_key.encode()
-    
-     # Utilisez une fonction de hachage pour créer une clé de longueur fixe
-    hashed_key = hashlib.sha256(combined_key).digest()
-    
-    # Convertissez la clé hachée en base64
-    app_key = base64.urlsafe_b64encode(hashed_key)
-    
-    return app_key
 
+
+    # Utilisez HMAC pour générer une clé de 32 octets
+    app_key = hmac.new(combined_key, digestmod=hashlib.sha256).digest()
+
+    # Convertissez la clé en base64
+    app_key_base64 = base64.urlsafe_b64encode(app_key).decode('utf-8')
+
+    
+    return app_key_base64
 
 # Fonction pour chiffrer un fichier
 def encrypt_file(file_path, app_key, user_key):
@@ -40,8 +42,9 @@ def encrypt_file(file_path, app_key, user_key):
     fernet_app = Fernet(app_key)
     encrypted_data = fernet_app.encrypt(data)
 
+    c = hmac.new(user_key.encode()+app_key.encode(), digestmod=hashlib.sha256).digest()
     # Chiffrement avec la clé de l'utilisateur
-    fernet_user = Fernet(user_key)
+    fernet_user = Fernet(base64.urlsafe_b64encode(c).decode('utf-8'))
     encrypted_data = fernet_user.encrypt(encrypted_data)
 
     # Enregistrez les données chiffrées dans le dossier de données
@@ -73,6 +76,7 @@ else:
     with open(user_key_file, "r") as file:
         user_key = file.read()
 
+# Convertissez la clé de l'application en bytes
 app_key = generate_app_key(user_password, user_key)
 
 # Créez un bouton pour sélectionner les fichiers à chiffrer
