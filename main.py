@@ -1,4 +1,3 @@
-import tkinter as tk
 from tkinter import simpledialog
 from tkinter import messagebox
 import os
@@ -19,11 +18,12 @@ if not os.path.exists(conf_file):
     path_crypt = simpledialog.askstring('Information', 'Entrez le path de destination des fichier crypté (drive)')
     path_decrypt = simpledialog.askstring('Information', 'Entrez le path de destination des fichier décrypté')
     with open(conf_file, "w") as file:
-        file.write(path_crypt+"\n")
+        file.write(path_crypt)
+        file.write(';')
         file.write(path_decrypt)
 
 with open(conf_file, 'r') as file:
-    paths = file.readlines()
+    paths = file.read().split(';')
     crypt_folder = paths[0]
     decrypt_folder = paths[1]
 
